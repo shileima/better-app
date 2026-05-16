@@ -1,0 +1,91 @@
+name: EAS Build
+
+on:
+  # 手动触发，可选择平台和构建类型
+  workflow_dispatch:
+    inputs:
+      platform:
+        description: "构建平台"
+        required: true
+        default: "all"
+        type: choice
+        options:
+          - all
+          - ios
+          - android
+      build_type:
+        description: "构建类型"
+        required: true
+        default: "preview"
+        type: choice
+        options:
+          - preview
+          - development
+          - release
+
+  # 打 tag 时自动触发发布构建
+  push:
+    tags:
+      - "v*"
+
+jobs:
+  build:
+    name: EAS Build (${{ github.event.inputs.platform || 'all' }} / ${{ github.event.inputs.build_type || 'release' }})
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Setup EAS
+        uses: expo/eas-build@main
+        with:
+          expo-token: ${{ secrets.EXPO_TOKEN }}
+
+      - name: Determine build type
+        id: config
+        run: |
+          # tag 推送时强制用 release，手动触发时用选择的类型
+          if [[ "${GITHUB_REF}" == refs/tags/v* ]]; then
+            echo "platform=all" >> $GITHUB_OUTPUT
+            echo "profile=release" >> $GITHUB_OUTPUT
+          else
+            echo "platform=${{ github.event.inputs.platform }}" >> $GITHUB_OUTPUT
+            echo "profile=${{ github.event.inputs.build_type }}" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Start EAS Build
+        run: |
+          eas build \
+            --platform ${{ steps.config.outputs.platform }} \
+            --profile ${{ steps.config.outputs.profile }} \
+            --non-interactive \
+            --wait
+        env:
+          EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
+
+      - name: Share build URL
+        if: always()
+        run: |
+          echo "## 📦 Build Results" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          eas build:list --limit 1 --output json | \
+            python3 -c "
+          import json, sys
+          data = json.load(sys.stdin)
+          for b in data:
+            platform = b.get('platform', 'unknown')
+            status = b.get('status', 'unknown')
+            url = b.get('artifacts', {}).get('buildUrl', 'N/A')
+            print(f'- **{platform}**: {status} — [Download]({url})')
+          " >> $GITHUB_STEP_SUMMARY || true
+        env:
+          EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
