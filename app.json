@@ -1,11 +1,12 @@
 {
   "expo": {
-    "name": "expo-app",
+    "name": "Expo Demo",
     "slug": "expo-app",
     "version": "1.0.0",
+    "scheme": "expodemo",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
-    "userInterfaceStyle": "light",
+    "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "splash": {
       "image": "./assets/splash-icon.png",
@@ -13,18 +14,59 @@
       "backgroundColor": "#ffffff"
     },
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "com.example.expodemo",
+      "infoPlist": {
+        "NSCameraUsageDescription": "需要使用相机以拍摄照片",
+        "NSPhotoLibraryUsageDescription": "需要访问相册以选择图片",
+        "NSLocationWhenInUseUsageDescription": "需要访问位置信息以展示当前位置",
+        "NSMicrophoneUsageDescription": "需要使用麦克风录制视频音频"
+      }
     },
     "android": {
+      "package": "com.example.expodemo",
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
       },
       "edgeToEdgeEnabled": true,
-      "predictiveBackGestureEnabled": false
+      "predictiveBackGestureEnabled": false,
+      "permissions": [
+        "ACCESS_COARSE_LOCATION",
+        "ACCESS_FINE_LOCATION",
+        "CAMERA",
+        "VIBRATE",
+        "READ_EXTERNAL_STORAGE",
+        "WRITE_EXTERNAL_STORAGE"
+      ]
     },
     "web": {
-      "favicon": "./assets/favicon.png"
+      "favicon": "./assets/favicon.png",
+      "bundler": "metro"
+    },
+    "plugins": [
+      "expo-router",
+      [
+        "expo-camera",
+        {
+          "cameraPermission": "需要使用相机以拍摄照片"
+        }
+      ],
+      [
+        "expo-location",
+        {
+          "locationAlwaysAndWhenInUsePermission": "需要访问位置信息以展示当前位置"
+        }
+      ],
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "需要访问相册以选择图片"
+        }
+      ]
+    ],
+    "experiments": {
+      "typedRoutes": true
     }
   }
 }
