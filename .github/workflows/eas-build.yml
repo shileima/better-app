@@ -45,8 +45,16 @@ jobs:
       - name: Pin npm version
         run: npm install -g npm@10.9.7
 
+      - name: Diagnose runner
+        run: |
+          echo "=== Disk ===" && df -h
+          echo "=== Memory ===" && free -h
+          echo "=== Node/npm ===" && node -v && npm -v
+
       - name: Install dependencies
-        run: npm ci --no-audit --no-fund
+        run: npm ci --no-audit --no-fund --prefer-offline
+        env:
+          NODE_OPTIONS: --max-old-space-size=6144
 
       - name: Setup EAS
         uses: expo/expo-github-action@v8
