@@ -28,7 +28,17 @@
       "autoIncrement": true,
       "android": {
         "buildType": "apk"
+      },
+      "ios": {
+        "simulator": true
       }
+    },
+    "release-store": {
+      "autoIncrement": true,
+      "android": {
+        "buildType": "app-bundle"
+      },
+      "ios": {}
     }
   },
   "submit": {

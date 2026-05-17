@@ -20,7 +20,8 @@
         "NSCameraUsageDescription": "需要使用相机以拍摄照片",
         "NSPhotoLibraryUsageDescription": "需要访问相册以选择图片",
         "NSLocationWhenInUseUsageDescription": "需要访问位置信息以展示当前位置",
-        "NSMicrophoneUsageDescription": "需要使用麦克风录制视频音频"
+        "NSMicrophoneUsageDescription": "需要使用麦克风录制视频音频",
+        "ITSAppUsesNonExemptEncryption": false
       }
     },
     "android": {
