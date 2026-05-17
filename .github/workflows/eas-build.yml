@@ -47,28 +47,27 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10.29.2
+          run_install: false
+
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: 20
-
-      - name: Pin npm version
-        run: npm install -g npm@10.9.7
-
-      - name: Disable npm cache
-        run: |
-          npm config set cache /tmp/npm-cache --global
-          npm config set fund false --global
-          npm config set audit false --global
+          cache: pnpm
 
       - name: Diagnose runner (before install)
         run: |
           echo "=== Disk ===" && df -h
           echo "=== Memory ===" && free -h
-          echo "=== Node/npm ===" && node -v && npm -v
+          echo "=== Node/pnpm ===" && node -v && pnpm -v
+          echo "=== .npmrc ===" && cat .npmrc
 
       - name: Install dependencies
-        run: npm ci --no-audit --no-fund --loglevel=error
+        run: pnpm install --frozen-lockfile
         env:
           NODE_OPTIONS: --max-old-space-size=6144
 
@@ -82,6 +81,7 @@ jobs:
         with:
           eas-version: latest
           token: ${{ secrets.EXPO_TOKEN }}
+          packager: pnpm
 
       - name: Determine build type
         id: config
