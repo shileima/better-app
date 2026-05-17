@@ -33,6 +33,17 @@ jobs:
     name: EAS Build (${{ github.event.inputs.platform || 'all' }} / ${{ github.event.inputs.build_type || 'release' }})
     runs-on: ubuntu-latest
     steps:
+      - name: Free disk space
+        uses: jlumbroso/free-disk-space@main
+        with:
+          tool-cache: false
+          android: true
+          dotnet: true
+          haskell: true
+          large-packages: true
+          docker-images: true
+          swap-storage: true
+
       - name: Checkout
         uses: actions/checkout@v4
 
@@ -44,12 +55,13 @@ jobs:
       - name: Pin npm version
         run: npm install -g npm@10.9.7
 
-      - name: Clean npm cache
+      - name: Disable npm cache
         run: |
-          rm -rf ~/.npm
-          npm cache clean --force
+          npm config set cache /tmp/npm-cache --global
+          npm config set fund false --global
+          npm config set audit false --global
 
-      - name: Diagnose runner
+      - name: Diagnose runner (before install)
         run: |
           echo "=== Disk ===" && df -h
           echo "=== Memory ===" && free -h
@@ -59,6 +71,11 @@ jobs:
         run: npm ci --no-audit --no-fund --loglevel=error
         env:
           NODE_OPTIONS: --max-old-space-size=6144
+
+      - name: Diagnose runner (after install)
+        if: always()
+        run: |
+          echo "=== Disk ===" && df -h
 
       - name: Setup EAS
         uses: expo/expo-github-action@v8
